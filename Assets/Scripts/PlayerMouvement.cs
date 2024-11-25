@@ -15,8 +15,16 @@ public class PlayerMouvement : MonoBehaviour
     [SerializeField]
     private bool moveWithJoystick = false;
 
+    [SerializeField]
+    private float mouseSensitivity = 100f;
+    //[SerializeField]
+    //private Transform cameraTransform;
+    private float xRotation = 0f;
+
+
     void Start()
     {
+        //Cursor.lockState = CursorLockMode.Locked;
         InputManager.Instance.RegisterOnJumpInput(jump);
     }
 
@@ -27,8 +35,8 @@ public class PlayerMouvement : MonoBehaviour
 
     void Update()
     {
-        if (transform.position.y < -10.0f) {
-            transform.position = new Vector3(0, 0.5f, 0);
+        if (transform.position.y < 0f) {
+            transform.position = new Vector3(0, 0.1f, 0);
             rb.velocity = Vector3.zero;
         }
         Vector3 newVelocity;
@@ -40,9 +48,21 @@ public class PlayerMouvement : MonoBehaviour
         }
         newVelocity.y = rb.velocity.y;
         rb.velocity = newVelocity;
+
+        RotatePlayer(newVelocity);
     }
 
     private void jump(InputAction.CallbackContext callbackContext) {
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
+
+    private void RotatePlayer(Vector3 movementVelocity) {
+        Vector3 horizontalVelocity = new Vector3(movementVelocity.x, 0f, movementVelocity.z);
+        if (horizontalVelocity.magnitude > 0.1f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(horizontalVelocity);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
+        }
+    }
+
 }
